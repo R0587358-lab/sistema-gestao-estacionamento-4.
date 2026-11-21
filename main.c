@@ -170,3 +170,143 @@ int lerIdentificador(const char *mensagem, char *buffer) {
 }
 
 
+void inicializarMapa(int mapa[FILEIRAS][COLUNAS]) {
+    int i, j;
+    for (i = 0; i < FILEIRAS; i++) {
+        for (j = 0; j < COLUNAS; j++) {
+            mapa[i][j] = 0;
+        }
+    }
+}
+
+int contarOcupadas(int mapa[FILEIRAS][COLUNAS]) {
+    int i, j, total = 0;
+    for (i = 0; i < FILEIRAS; i++) {
+        for (j = 0; j < COLUNAS; j++) {
+            if (mapa[i][j] == 1) {
+                total++;
+            }
+        }
+    }
+    return total;
+}
+
+void exibirMapa(int mapa[FILEIRAS][COLUNAS]) {
+    int i, j;
+
+    printf("\n=== MAPA DE VAGAS ===\n");
+    printf("   ");
+    for (j = 0; j < COLUNAS; j++) {
+        printf("C%d ", j + 1);
+    }
+    printf("\n");
+    for (i = 0; i < FILEIRAS; i++) {
+        printf("F%d ", i + 1);
+        for (j = 0; j < COLUNAS; j++) {
+            printf("%c  ", mapa[i][j] == 1 ? 'X' : '.');
+        }
+        printf("\n");
+    }
+    printf("Legenda: X = ocupada; . = livre\n");
+}
+
+int inicializarEstacionamento(Estacionamento *e) {
+    inicializarMapa(e->mapa);
+    e->quantidade = 0;
+    e->capacidade = 0;
+    e->veiculos = malloc(CAPACIDADE_INICIAL * sizeof(Veiculo));
+    if (e->veiculos == NULL) {
+        return 0;
+    }
+    e->capacidade = CAPACIDADE_INICIAL;
+    return 1;
+}
+
+void liberarEstacionamento(Estacionamento *e) {
+    free(e->veiculos);
+    e->veiculos = NULL;
+    e->quantidade = 0;
+    e->capacidade = 0;
+}
+
+int ampliarCapacidade(Estacionamento *e) {
+    int novaCapacidade = e->capacidade * 2;
+    Veiculo *temporario = realloc(e->veiculos, novaCapacidade * sizeof(Veiculo));
+
+    if (temporario == NULL) {
+        return 0;
+    }
+    e->veiculos = temporario;
+    e->capacidade = novaCapacidade;
+    return 1;
+}
+
+int buscarVeiculo(const Estacionamento *e, const char *id) {
+    int i;
+    for (i = 0; i < e->quantidade; i++) {
+        if (strcmp(e->veiculos[i].identificador, id) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int inserirVeiculo(Estacionamento *e, const Veiculo *novo) {
+    if (e->quantidade >= TOTAL_VAGAS) {
+        return INS_LOTADO;
+    }
+    if (!posicaoValida(novo->fileira, novo->coluna)) {
+        return INS_POSICAO_INVALIDA;
+    }
+    if (!vagaLivre(e, novo->fileira, novo->coluna)) {
+        return INS_VAGA_OCUPADA;
+    }
+    if (e->quantidade == e->capacidade) {
+        if (!ampliarCapacidade(e)) {
+            return INS_SEM_MEMORIA;
+        }
+    }
+    e->veiculos[e->quantidade] = *novo;
+    e->quantidade++;
+    e->mapa[novo->fileira - 1][novo->coluna - 1] = 1;
+    return INS_OK;
+}
+
+void removerVeiculoPorIndice(Estacionamento *e, int indice) {
+    int i;
+    Veiculo *v = &e->veiculos[indice];
+
+    e->mapa[v->fileira - 1][v->coluna - 1] = 0;
+    for (i = indice; i < e->quantidade - 1; i++) {
+        e->veiculos[i] = e->veiculos[i + 1];
+    }
+    e->quantidade--;
+}
+
+int moverVeiculoPara(Estacionamento *e, int indice, int fileira, int coluna) {
+    Veiculo *v = &e->veiculos[indice];
+
+    if (!posicaoValida(fileira, coluna) || !vagaLivre(e, fileira, coluna)) {
+        return 0;
+    }
+    e->mapa[v->fileira - 1][v->coluna - 1] = 0;
+    e->mapa[fileira - 1][coluna - 1] = 1;
+    v->fileira = fileira;
+    v->coluna = coluna;
+    return 1;
+}
+
+int contarCategoria(const Estacionamento *e, int categoria) {
+    const Veiculo *p;
+    int total = 0;
+
+    for (p = e->veiculos; p < e->veiculos + e->quantidade; p++) {
+        if (p->categoria == categoria) {
+            total++;
+        }
+    }
+    return total;
+}
+
+
+
