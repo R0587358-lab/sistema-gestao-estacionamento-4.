@@ -571,6 +571,7 @@ int main(void) {
     Estacionamento est;
     char buffer[TAM_BUFFER];
     int opcao;
+    int resultadoLeitura;
 
     if (!inicializarEstacionamento(&est)) {
         fprintf(stderr, "Erro: não foi possível alocar memória.\n");
