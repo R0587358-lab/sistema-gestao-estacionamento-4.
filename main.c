@@ -478,3 +478,133 @@ void telaAtualizar(Estacionamento *e) {
 }
 
 
+void telaMover(Estacionamento *e) {
+    char id[TAM_BUFFER];
+    int indice, fileira, coluna;
+    Veiculo *v;
+
+    if (!lerIdentificador("Identificador do veículo a mover: ", id)) {
+        printf("Entrada inválida.\n");
+        return;
+    }
+    indice = buscarVeiculo(e, id);
+    if (indice == -1) {
+        printf("Veículo não localizado.\n");
+        return;
+    }
+    v = &e->veiculos[indice];
+    printf("Posição atual: F%d/C%d\n", v->fileira, v->coluna);
+
+    if (!lerInteiro("Nova fileira (1 a 4): ", &fileira) ||
+        fileira < 1 || fileira > FILEIRAS) {
+        printf("Fileira inválida. Movimentação cancelada.\n");
+        return;
+    }
+    if (!lerInteiro("Nova coluna (1 a 5): ", &coluna) ||
+        coluna < 1 || coluna > COLUNAS) {
+        printf("Coluna inválida. Movimentação cancelada.\n");
+        return;
+    }
+
+    if (fileira == v->fileira && coluna == v->coluna) {
+        printf("O veículo já está nessa vaga. Nada foi alterado.\n");
+        return;
+    }
+    if (moverVeiculoPara(e, indice, fileira, coluna)) {
+        printf("Veículo %s movido para F%d/C%d.\n", v->identificador, fileira, coluna);
+    } else {
+        printf("Movimentação recusada: a vaga F%d/C%d está ocupada.\n", fileira, coluna);
+    }
+}
+
+void telaRemover(Estacionamento *e) {
+    char id[TAM_BUFFER];
+    int indice;
+
+    if (!lerIdentificador("Identificador do veículo a remover: ", id)) {
+        printf("Entrada inválida.\n");
+        return;
+    }
+    indice = buscarVeiculo(e, id);
+    if (indice == -1) {
+        printf("Veículo não localizado.\n");
+        return;
+    }
+    removerVeiculoPorIndice(e, indice);
+    printf("Veículo %s removido. Vaga liberada.\n", id);
+}
+
+void telaListar(Estacionamento *e) {
+    int i;
+
+    if (e->quantidade == 0) {
+        printf("Nenhum veículo cadastrado.\n");
+        return;
+    }
+    printf("\n=== VEÍCULOS CADASTRADOS (%d) ===\n", e->quantidade);
+    for (i = 0; i < e->quantidade; i++) {
+        printf("%d)\n", i + 1);
+        exibirVeiculo(&e->veiculos[i]);
+    }
+}
+
+void telaRelatorio(Estacionamento *e) {
+    int ocupadas = contarOcupadas(e->mapa);
+    int livres = TOTAL_VAGAS - ocupadas;
+    double percentual = (ocupadas / (double)TOTAL_VAGAS) * 100.0;
+
+    printf("\n=== RELATÓRIO DA OCUPAÇÃO ===\n");
+    printf("Total de vagas     : %d\n", TOTAL_VAGAS);
+    printf("Vagas ocupadas     : %d\n", ocupadas);
+    printf("Vagas livres       : %d\n", livres);
+    printf("Percentual ocupação: %.2f%%\n", percentual);
+    printf("Carros             : %d\n", contarCategoria(e, CARRO));
+    printf("Motos              : %d\n", contarCategoria(e, MOTO));
+    printf("Vetor dinâmico     : %d usados de %d de capacidade\n", e->quantidade, e->capacidade);
+
+    if (ocupadas != e->quantidade) {
+        printf("ATENÇÃO: inconsistência entre o mapa e os registros!\n");
+    }
+}
+
+int main(void) {
+    Estacionamento est;
+    char buffer[TAM_BUFFER];
+    int opcao;
+
+    if (!inicializarEstacionamento(&est)) {
+        fprintf(stderr, "Erro: não foi possível alocar memória.\n");
+        return 1;
+    }
+
+    do {
+        exibirMenu();
+        printf("Escolha uma opção: ");
+        if (lerLinha(buffer, TAM_BUFFER) == LEITURA_FIM) {
+            printf("\nFim da entrada. Encerrando.\n");
+            opcao = 0;
+        } else if (!converterInteiro(buffer, &opcao)) {
+            opcao = -1;
+        }
+
+        switch (opcao) {
+            case 1: telaCadastrar(&est); break;
+            case 2: telaConsultar(&est); break;
+            case 3: telaAtualizar(&est); break;
+            case 4: telaMover(&est); break;
+            case 5: telaRemover(&est); break;
+            case 6: telaListar(&est); break;
+            case 7: exibirMapa(est.mapa); break;
+            case 8: telaRelatorio(&est); break;
+            case 0: break;
+            default: printf("Opção inválida. Tente novamente.\n");
+        }
+    } while (opcao != 0);
+
+    liberarEstacionamento(&est);
+    printf("Memória liberada. Sistema encerrado.\n");
+    return 0;
+}
+
+
+
