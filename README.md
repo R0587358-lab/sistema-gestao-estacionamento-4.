@@ -9,7 +9,7 @@
 - **Integrante:** Rafael De Souza Porto
 - **GitHub:** https://github.com/R0587358-lab
 - **Arquivo principal:** `main.c`
-- **Repositório GitHub:** https://github.com/R0587358-lab/sistema-gestao-estacionamento-4
+- **Repositório GitHub:**https://github.com/R0587358-lab/sistema-gestao-estacionamento-4.
 
 ## 2. Descrição do projeto
 
