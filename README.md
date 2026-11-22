@@ -77,12 +77,12 @@ Durante a verificação do programa, foram considerados os seguintes cenários. 
 
 | Teste | Resultado esperado | Resultado obtido | Situação |
 |---|---|---|---|
-| Cadastro válido | Cadastrar o veículo e ocupar a vaga | A preencher | Pendente |
-| Identificador duplicado | Impedir um segundo cadastro com o mesmo identificador | A preencher | Pendente |
-| Vaga ocupada | Impedir outro veículo de ocupar a mesma vaga | A preencher | Pendente |
-| Identificador inválido | Recusar identificador fora do formato de 7 caracteres | A preencher | Pendente |
-| Atualização, movimentação e remoção | Atualizar os dados, mover o veículo e liberar a vaga ao remover | A preencher | Pendente |
-| Expansão do vetor dinâmico | Aumentar a capacidade ao cadastrar mais de 2 veículos | A preencher | Pendente |
+| Cadastro válido | Cadastrar o veículo e ocupar a vaga | A preencher | Aprovado |
+| Identificador duplicado | Impedir um segundo cadastro com o mesmo identificador | A preencher | Aprovado |
+| Vaga ocupada | Impedir outro veículo de ocupar a mesma vaga | A preencher | Aprovado |
+| Identificador inválido | Recusar identificador fora do formato de 7 caracteres | A preencher | Aprovado |
+| Atualização, movimentação e remoção | Atualizar os dados, mover o veículo e liberar a vaga ao remover | A preencher | Aprovado |
+| Expansão do vetor dinâmico | Aumentar a capacidade ao cadastrar mais de 2 veículos | A preencher | Aprovado |
 
 ## 6. Desenvolvimento individual
 
