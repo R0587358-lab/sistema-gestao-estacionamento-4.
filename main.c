@@ -577,15 +577,15 @@ int main(void) {
         return 1;
     }
 
-    do {
-        exibirMenu();
-        printf("Escolha uma opção: ");
-        if (lerLinha(buffer, TAM_BUFFER) == LEITURA_FIM) {
-            printf("\nFim da entrada. Encerrando.\n");
-            opcao = 0;
-        } else if (!converterInteiro(buffer, &opcao)) {
-            opcao = -1;
-        }
+    resultadoLeitura = lerLinha(buffer, TAM_BUFFER);
+
+if (resultadoLeitura == LEITURA_FIM) {
+    printf("\nFim da entrada. Encerrando.\n");
+    opcao = 0;
+} else if (resultadoLeitura != LEITURA_OK ||
+           !converterInteiro(buffer, &opcao)) {
+    opcao = -1;
+}
 
         switch (opcao) {
             case 1: telaCadastrar(&est); break;
