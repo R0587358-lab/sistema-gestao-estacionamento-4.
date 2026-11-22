@@ -309,4 +309,172 @@ int contarCategoria(const Estacionamento *e, int categoria) {
 }
 
 
+const char *nomeCategoria(int categoria) {
+    return categoria == CARRO ? "Carro" : "Moto";
+}
+
+void exibirVeiculo(const Veiculo *v) {
+    printf("  Identificador: %s\n", v->identificador);
+    printf("  Descrição    : %s\n", v->descricao);
+    printf("  Categoria    : %d (%s)\n", v->categoria, nomeCategoria(v->categoria));
+    printf("  Posição      : Fileira %d, Coluna %d\n", v->fileira, v->coluna);
+}
+
+void exibirMenu(void) {
+    printf("\n===== ESTACIONAMENTO =====\n");
+    printf("1 - Cadastrar veículo\n");
+    printf("2 - Consultar veículo por identificador\n");
+    printf("3 - Atualizar descrição ou categoria\n");
+    printf("4 - Mover veículo para outra vaga\n");
+    printf("5 - Remover veículo\n");
+    printf("6 - Listar veículos cadastrados\n");
+    printf("7 - Exibir mapa de vagas\n");
+    printf("8 - Exibir relatório da ocupação\n");
+    printf("0 - Encerrar sistema\n");
+}
+
+void telaCadastrar(Estacionamento *e) {
+    Veiculo novo;
+    char buffer[TAM_BUFFER];
+    int resultado;
+
+    if (e->quantidade >= TOTAL_VAGAS) {
+        printf("Cadastro recusado: estacionamento lotado (%d vagas).\n", TOTAL_VAGAS);
+        return;
+    }
+
+    if (!lerIdentificador("Identificador (7 letras/números): ", buffer)) {
+        printf("Entrada inválida. Cadastro cancelado.\n");
+        return;
+    }
+    if (!identificadorValido(buffer)) {
+        printf("Identificador inválido: use exatamente 7 caracteres (A-Z e 0-9, sem espaços ou símbolos).\n");
+        return;
+    }
+    if (buscarVeiculo(e, buffer) != -1) {
+        printf("Cadastro recusado: o identificador %s já está cadastrado.\n", buffer);
+        return;
+    }
+    strcpy(novo.identificador, buffer);
+
+    printf("Descrição (1 a %d caracteres): ", TAM_DESC);
+    if (lerLinha(buffer, TAM_BUFFER) != LEITURA_OK || !descricaoValida(buffer)) {
+        printf("Descrição inválida (vazia ou com mais de %d caracteres). Cadastro cancelado.\n", TAM_DESC);
+        return;
+    }
+    strcpy(novo.descricao, buffer);
+
+    if (!lerInteiro("Categoria (1 = carro, 2 = moto): ", &novo.categoria) ||
+        !categoriaValida(novo.categoria)) {
+        printf("Categoria inválida. Cadastro cancelado.\n");
+        return;
+    }
+
+    if (!lerInteiro("Fileira (1 a 4): ", &novo.fileira) ||
+        novo.fileira < 1 || novo.fileira > FILEIRAS) {
+        printf("Fileira inválida. Cadastro cancelado.\n");
+        return;
+    }
+    if (!lerInteiro("Coluna (1 a 5): ", &novo.coluna) ||
+        novo.coluna < 1 || novo.coluna > COLUNAS) {
+        printf("Coluna inválida. Cadastro cancelado.\n");
+        return;
+    }
+
+    resultado = inserirVeiculo(e, &novo);
+    if (resultado == INS_OK) {
+        printf("Veículo %s cadastrado na fileira %d, coluna %d.\n",
+               novo.identificador, novo.fileira, novo.coluna);
+    } else if (resultado == INS_VAGA_OCUPADA) {
+        printf("Cadastro recusado: a vaga F%d/C%d já está ocupada.\n", novo.fileira, novo.coluna);
+    } else if (resultado == INS_SEM_MEMORIA) {
+        printf("Erro: não foi possível ampliar a memória. Cadastro cancelado.\n");
+    } else if (resultado == INS_LOTADO) {
+        printf("Cadastro recusado: estacionamento lotado.\n");
+    } else {
+        printf("Cadastro recusado: posição inválida.\n");
+    }
+}
+
+void telaConsultar(Estacionamento *e) {
+    char id[TAM_BUFFER];
+    int indice;
+
+    if (!lerIdentificador("Identificador a consultar: ", id)) {
+        printf("Entrada inválida.\n");
+        return;
+    }
+    indice = buscarVeiculo(e, id);
+    if (indice == -1) {
+        printf("Veículo não localizado.\n");
+        return;
+    }
+    printf("Veículo encontrado:\n");
+    exibirVeiculo(&e->veiculos[indice]);
+}
+
+void telaAtualizar(Estacionamento *e) {
+    char id[TAM_BUFFER];
+    char textoDesc[TAM_BUFFER];
+    char textoCat[TAM_BUFFER];
+    int indice;
+    int novaCategoria = 0;
+    int mudaDescricao = 0;
+    int mudaCategoria = 0;
+    Veiculo *v;
+
+    if (!lerIdentificador("Identificador do veículo a atualizar: ", id)) {
+        printf("Entrada inválida.\n");
+        return;
+    }
+    indice = buscarVeiculo(e, id);
+    if (indice == -1) {
+        printf("Veículo não localizado.\n");
+        return;
+    }
+    v = &e->veiculos[indice];
+    printf("Dados atuais:\n");
+    exibirVeiculo(v);
+
+    printf("Nova descrição (Enter para manter): ");
+    if (lerLinha(textoDesc, TAM_BUFFER) != LEITURA_OK) {
+        printf("Descrição inválida. Atualização cancelada.\n");
+        return;
+    }
+    if (textoDesc[0] != '\0') {
+        if (!descricaoValida(textoDesc)) {
+            printf("Descrição inválida (vazia ou com mais de %d caracteres). Atualização cancelada.\n", TAM_DESC);
+            return;
+        }
+        mudaDescricao = 1;
+    }
+
+    printf("Nova categoria (1 = carro, 2 = moto, Enter para manter): ");
+    if (lerLinha(textoCat, TAM_BUFFER) != LEITURA_OK) {
+        printf("Categoria inválida. Atualização cancelada.\n");
+        return;
+    }
+    if (textoCat[0] != '\0') {
+        if (!converterInteiro(textoCat, &novaCategoria) || !categoriaValida(novaCategoria)) {
+            printf("Categoria inválida. Atualização cancelada.\n");
+            return;
+        }
+        mudaCategoria = 1;
+    }
+
+    if (!mudaDescricao && !mudaCategoria) {
+        printf("Nada foi alterado.\n");
+        return;
+    }
+
+    if (mudaDescricao) {
+        strcpy(v->descricao, textoDesc);
+    }
+    if (mudaCategoria) {
+        v->categoria = novaCategoria;
+    }
+    printf("Veículo atualizado:\n");
+    exibirVeiculo(v);
+}
+
 
