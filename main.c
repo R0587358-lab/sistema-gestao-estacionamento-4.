@@ -287,15 +287,23 @@ void removerVeiculoPorIndice(Estacionamento *e, int indice) {
 }
 
 int moverVeiculoPara(Estacionamento *e, int indice, int fileira, int coluna) {
-    Veiculo *v = &e->veiculos[indice];
+    Veiculo *v;
+
+    if (indice < 0 || indice >= e->quantidade) {
+        return 0;
+    }
+
+    v = &e->veiculos[indice];
 
     if (!posicaoValida(fileira, coluna) || !vagaLivre(e, fileira, coluna)) {
         return 0;
     }
+
     e->mapa[v->fileira - 1][v->coluna - 1] = 0;
     e->mapa[fileira - 1][coluna - 1] = 1;
     v->fileira = fileira;
     v->coluna = coluna;
+
     return 1;
 }
 
