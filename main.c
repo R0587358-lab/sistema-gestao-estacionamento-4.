@@ -308,10 +308,18 @@ int contarCategoria(const Estacionamento *e, int categoria) {
     return total;
 }
 
-
 const char *nomeCategoria(int categoria) {
-    return categoria == CARRO ? "Carro" : "Moto";
+    if (categoria == CARRO) {
+        return "Carro";
+    }
+
+    if (categoria == MOTO) {
+        return "Moto";
+    }
+
+    return "Desconhecida";
 }
+
 
 void exibirVeiculo(const Veiculo *v) {
     printf("  Identificador: %s\n", v->identificador);
