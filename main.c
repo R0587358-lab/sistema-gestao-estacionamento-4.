@@ -597,30 +597,34 @@ int main(void) {
         return 1;
     }
 
+    do {
+    exibirMenu();
+    printf("Escolha uma opção: ");
+
     resultadoLeitura = lerLinha(buffer, TAM_BUFFER);
 
-if (resultadoLeitura == LEITURA_FIM) {
-    printf("\nFim da entrada. Encerrando.\n");
-    opcao = 0;
-} else if (resultadoLeitura != LEITURA_OK ||
-           !converterInteiro(buffer, &opcao)) {
-    opcao = -1;
-}
+    if (resultadoLeitura == LEITURA_FIM) {
+        printf("\nFim da entrada. Encerrando.\n");
+        opcao = 0;
+    } else if (resultadoLeitura != LEITURA_OK ||
+               !converterInteiro(buffer, &opcao)) {
+        opcao = -1;
+    }
 
-        switch (opcao) {
-            case 1: telaCadastrar(&est); break;
-            case 2: telaConsultar(&est); break;
-            case 3: telaAtualizar(&est); break;
-            case 4: telaMover(&est); break;
-            case 5: telaRemover(&est); break;
-            case 6: telaListar(&est); break;
-            case 7: exibirMapa(est.mapa); break;
-            case 8: telaRelatorio(&est); break;
-            case 0: break;
-            default: printf("Opção inválida. Tente novamente.\n");
-        }
-    } while (opcao != 0);
-
+    switch (opcao) {
+        case 1: telaCadastrar(&est); break;
+        case 2: telaConsultar(&est); break;
+        case 3: telaAtualizar(&est); break;
+        case 4: telaMover(&est); break;
+        case 5: telaRemover(&est); break;
+        case 6: telaListar(&est); break;
+        case 7: exibirMapa(est.mapa); break;
+        case 8: telaRelatorio(&est); break;
+        case 0: break;
+        default: printf("Opção inválida. Tente novamente.\n");
+    }
+            
+} while (opcao != 0);
     liberarEstacionamento(&est);
     printf("Memória liberada. Sistema encerrado.\n");
     return 0;
