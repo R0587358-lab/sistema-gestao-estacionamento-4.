@@ -274,7 +274,10 @@ int inserirVeiculo(Estacionamento *e, const Veiculo *novo) {
 
 void removerVeiculoPorIndice(Estacionamento *e, int indice) {
     int i;
-    Veiculo *v = &e->veiculos[indice];
+    if (indice < 0 || indice >= e->quantidade) {
+        return;
+    }
+     Veiculo *v = &e->veiculos[indice];
 
     e->mapa[v->fileira - 1][v->coluna - 1] = 0;
     for (i = indice; i < e->quantidade - 1; i++) {
